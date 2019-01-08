@@ -8,6 +8,7 @@ import time
 import requests
 import pickle
 
+global UrlList
 
 def login(url, name, password):
     driver.get(url)
@@ -58,36 +59,37 @@ def login_with_cookie(url):
         login(url," "," ")
 
     print("登录成功")
-    
-    print(driver.title)
 
+def open_all(UrlList):
+    for Urls in UrlList[1:]:
+        js = 'window.open(\"' + Urls + '\");'
+        driver.execute_script(js)
+    return driver.window_handles
 
-def send_barrage():
+def send_barrage(HandleList,DanmuList):
+    SendIndex = 0
     while (True):
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).send_keys("好听")
+        for Index in range(len(HandleList)):
+            #切换到当前窗口
+            driver.switch_to.window(HandleList[Index])
+            #防止douyu页面自动跳转
+            if driver.current_url != UrlList[Index]:
+                driver.get(UrlList[Index])
 
-        time.sleep(1)
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > div"))).click()
-        # 清空输入框信息
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).clear()
-        print("好听")
-
-        time.sleep(3)
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).send_keys("无敌了")
-        time.sleep(1)
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > div"))).click()
-        # 清空输入框信息
-        wait.until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).clear()
-        print("无敌了")
-
-        time.sleep(3)
-
+            wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).send_keys(DanmuList[Index][SendIndex % len(DanmuList[Index])])
+            time.sleep(1)
+            wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > div"))).click()
+            # 清空输入框信息
+            wait.until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "#js-player-asideMain > div > div.layout-Player-chat > div > div.ChatSpeak > div.ChatSend > textarea"))).clear()
+            time.sleep(1)
+            print(driver.title + ':' + DanmuList[Index][SendIndex % len(DanmuList[Index])])
+        SendIndex = SendIndex + 1
+        if SendIndex > 10000:
+            SendIndex = 0
+        time.sleep(5)
 
 if __name__ == "__main__":
 
@@ -116,13 +118,24 @@ if __name__ == "__main__":
     # 显示等待是定向性的，最大等待时间10s,每次检测元素有没有生成的时间间隔300ms，过了最大等待时间抛出异常
     wait = WebDriverWait(driver, timeout=10, poll_frequency=300)
 
-    url = 'https://www.douyu.com/643037'
+    UrlList = ['https://www.douyu.com/5804434','https://www.douyu.com/5632185']
     name = ""
     password = ""
     if os.path.exists("./cookie/cookies.pkl"):
         print("当前目录下存在斗鱼登录的cookie文件，将为您自动登录")
-        login_with_cookie(url)
+        login_with_cookie(UrlList[0])
     else:
         print("当前目录下不存在斗鱼登录的cookie文件")
-        login(url, name, password)
-    send_barrage()
+        login(UrlList[0], name, password)
+    #打开全网页
+    HandleList = open_all(UrlList)
+    #加载弹幕
+    DanmuList = []
+    for i in range(len(HandleList)):
+        DanmuList.append(["666","6666"])
+    
+    DanmuList[0] = ["好听","真厉害"]
+    DanmuList[1] = ["好骚","太菜了","针垃圾啊"]
+
+    send_barrage(HandleList,DanmuList)
+    
