@@ -7,6 +7,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 import time
 import requests
 import pickle
+import random
 
 global UrlList
 
@@ -89,7 +90,7 @@ def send_barrage(HandleList,DanmuList):
         SendIndex = SendIndex + 1
         if SendIndex > 10000:
             SendIndex = 0
-        time.sleep(5)
+        time.sleep(90)
 
 if __name__ == "__main__":
 
@@ -118,7 +119,8 @@ if __name__ == "__main__":
     # 显示等待是定向性的，最大等待时间10s,每次检测元素有没有生成的时间间隔300ms，过了最大等待时间抛出异常
     wait = WebDriverWait(driver, timeout=10, poll_frequency=300)
 
-    UrlList = ['https://www.douyu.com/5804434','https://www.douyu.com/5632185']
+    UrlList = ['https://www.douyu.com/5632185','https://www.douyu.com/5804434']
+    # UrlList = ['https://www.douyu.com/5632185']
     name = ""
     password = ""
     if os.path.exists("./cookie/cookies.pkl"):
@@ -133,9 +135,13 @@ if __name__ == "__main__":
     DanmuList = []
     for i in range(len(HandleList)):
         DanmuList.append(["666","6666"])
-    
-    DanmuList[0] = ["好听","真厉害"]
-    DanmuList[1] = ["好骚","太菜了","针垃圾啊"]
-
+    Danmutmp = []
+    f = open('welcome.txt','r', encoding='UTF-8') # 读模式
+    for line in f.readlines(): 
+        Danmutmp.append(line)
+    f.close()
+    random.shuffle(Danmutmp)
+    DanmuList[0] = Danmutmp
+    DanmuList[1] = ["欢迎新来的朋友来到蜡笔小PAN的直播间！喜欢主播的朋友请点一下关注！","主播粉丝Q群773602911！希望朋友们可以畅所欲言，多发弹幕！每一条弹幕都是对主播最大的支持和鼓励！"]
     send_barrage(HandleList,DanmuList)
     
